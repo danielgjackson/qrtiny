@@ -20,14 +20,14 @@ typedef enum {
     OUTPUT_TEXT_MEDIUM,
 } output_mode_t;
 
-void OutputQrCodeTextMedium(uint8_t *buffer, FILE* fp, int quiet, bool invert)
+void OutputQrTinyTextMedium(uint8_t *buffer, uint16_t formatInfo, FILE* fp, int quiet, bool invert)
 {
-    for (int y = -quiet; y < QRCODE_DIMENSION + quiet; y += 2)
+    for (int y = -quiet; y < QRTINY_DIMENSION + quiet; y += 2)
     {
-        for (int x = -quiet; x < QRCODE_DIMENSION + quiet; x++)
+        for (int x = -quiet; x < QRTINY_DIMENSION + quiet; x++)
         {
-            int bitU = QrTinyModuleGet(buffer, x, y) & 1;
-            int bitL = (y + 1 < QRCODE_DIMENSION + quiet) ? (QrTinyModuleGet(buffer, x, y + 1) & 1) : (invert ? 0 : 1);
+            int bitU = QrTinyModuleGet(buffer, formatInfo, x, y) & 1;
+            int bitL = (y + 1 < QRTINY_DIMENSION + quiet) ? (QrTinyModuleGet(buffer, formatInfo, x, y + 1) & 1) : (invert ? 0 : 1);
             int value = ((bitL ? 2 : 0) + (bitU ? 1 : 0)) ^ (invert ? 0x3 : 0x0);
             switch (value)
             {
@@ -48,17 +48,17 @@ int main(int argc, char *argv[])
     const char *value = NULL;
     bool help = false;
     bool invert = false;
-    int quiet = QRCODE_QUIET_STANDARD;
+    int quiet = QRTINY_QUIET_STANDARD;
     output_mode_t outputMode = OUTPUT_TEXT_MEDIUM;
-    int formatInfo = QRCODE_FORMATINFO_MASK_000_ECC_MEDIUM;
+    uint16_t formatInfo = QRTINY_FORMATINFO_MASK_000_ECC_MEDIUM;
     
     for (int i = 1; i < argc; i++)
     {
         if (!strcmp(argv[i], "--help")) { help = true; }
-        else if (!strcmp(argv[i], "--ecl:m")) { formatInfo = QRCODE_FORMATINFO_MASK_000_ECC_MEDIUM; }
-        else if (!strcmp(argv[i], "--ecl:l")) { formatInfo = QRCODE_FORMATINFO_MASK_000_ECC_LOW; }
-        else if (!strcmp(argv[i], "--ecl:h")) { formatInfo = QRCODE_FORMATINFO_MASK_000_ECC_HIGH; }
-        else if (!strcmp(argv[i], "--ecl:q")) { formatInfo = QRCODE_FORMATINFO_MASK_000_ECC_QUARTILE; }
+        else if (!strcmp(argv[i], "--ecl:m")) { formatInfo = QRTINY_FORMATINFO_MASK_000_ECC_MEDIUM; }
+        else if (!strcmp(argv[i], "--ecl:l")) { formatInfo = QRTINY_FORMATINFO_MASK_000_ECC_LOW; }
+        else if (!strcmp(argv[i], "--ecl:h")) { formatInfo = QRTINY_FORMATINFO_MASK_000_ECC_HIGH; }
+        else if (!strcmp(argv[i], "--ecl:q")) { formatInfo = QRTINY_FORMATINFO_MASK_000_ECC_QUARTILE; }
         else if (!strcmp(argv[i], "--quiet")) { quiet = atoi(argv[++i]); }
         else if (!strcmp(argv[i], "--invert")) { invert = !invert; }
         else if (!strcmp(argv[i], "--file"))
@@ -98,17 +98,14 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    // Create a scratch buffer for holding the encoded payload and ECC calculations
-    uint8_t *scratchBuffer = malloc(QRCODE_SCRATCH_BUFFER_SIZE);
+    // Create a buffer for holding the encoded payload and ECC calculations
+    uint8_t *buffer = malloc(QRTINY_BUFFER_SIZE);
 
-    // Encode the text into the scratch buffer
-    size_t payloadLength = QrTinyWriteAlphanumeric(scratchBuffer, 0, value);
-
-    // Create buffer for holding the QR Code bitmap (0=light, 1=dark)
-    uint8_t *buffer = malloc(QRCODE_BUFFER_SIZE);
+    // Encode the text into the buffer
+    size_t payloadLength = QrTinyWriteAlphanumeric(buffer, 0, value);
 
     // Generate the QR Code bitmap
-    bool result = QrTinyGenerate(buffer, scratchBuffer, payloadLength, formatInfo);
+    bool result = QrTinyGenerate(buffer, payloadLength, formatInfo);
 
     if (result)
     {
@@ -118,7 +115,7 @@ int main(int argc, char *argv[])
 #endif
         switch (outputMode)
         {
-            case OUTPUT_TEXT_MEDIUM: OutputQrCodeTextMedium(buffer, ofp, quiet, invert); break;
+            case OUTPUT_TEXT_MEDIUM: OutputQrTinyTextMedium(buffer, formatInfo, ofp, quiet, invert); break;
             default: fprintf(ofp, "<error>"); break;
         }
     }

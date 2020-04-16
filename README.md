@@ -1,70 +1,42 @@
 # Tiny QR Code Generator
 
-Generates a tiny "V1" QR Code, optimized for very low RAM use on embedded environments.
+Generates a tiny "V1" QR Code, optimized for very low RAM use on embedded environments: the find output modules are computed on demand (rather than stored in a buffer).
 
 Required files: [`qrtiny.h`](qrtiny.h) [`qrtiny.c`](qrtiny.c)
 
 ## Use
 
 ```c
-// Use a scratch buffer for holding the encoded payload and ECC calculations
-uint8_t *scratchBuffer[QRCODE_SCRATCH_BUFFER_SIZE];
+// Use a buffer for holding the encoded payload and ECC calculations
+uint8_t *buffer[QRCODE_SCRATCH_BUFFER_SIZE];
 ```
 
 ```c
-// Encode the text into the scratch buffer (alternatively `QrTinyWriteNumeric` or `QrTinyWrite8Bit`.
-size_t payloadLength = QrTinyWriteAlphanumeric(scratchBuffer, 0, text);
+// Encode one or more segments of text into the buffer (can also use `QrTinyWriteNumeric` or `QrTinyWrite8Bit`).
+size_t payloadLength = QrTinyWriteAlphanumeric(buffer, 0, text);
 ```
 
 ```c
-// Use a buffer for holding the QR Code bitmap (0=light, 1=dark)
-uint8_t *buffer[QRCODE_BUFFER_SIZE];
+// Choose a format for the QR Code: a mask pattern (binary `000` to `111`) and an error correction level (`LOW`, `MEDIUM`, `QUARTILE`, `HIGH`).
+uint16_t formatInfo = QRTINY_FORMATINFO_MASK_000_ECC_MEDIUM;
 ```
 
 ```c
-// Generate the QR Code bitmap
-bool result = QrTinyGenerate(buffer, scratchBuffer, payloadLength, errorCorrectionLevel, maskPattern);
+// Compute the remaining buffer space: any required padding and the calculated error-correction information
+bool result = QrTinyGenerate(buffer, payloadLength, formatInfo);
 ```
 
-Where `errorCorrectionLevel` is one of: `QRCODE_ECL_L` (low, ~7%), `QRCODE_ECL_M` (medium, ~15%), `QRCODE_ECL_Q` (quartile, ~25%), `QRCODE_ECL_H` (high, ~30%).
-
-And, where `maskPattern` is one of: `QRCODE_MASK_000` to `QRCODE_MASK_111` (counting in binary).
-
-Finally, read a module at the given coordinates (0) to (QRCODE_DIMENSION-1); (subtract `QRCODE_QUIET_STANDARD` for margin):
-
 ```c
-// Get the module at the given coordinate (0=light, 1=dark)
-int QrTinyModuleGet(uint8_t *buffer, int x, int y);
-```
-
-
-```c
-size_t QrTinyWriteAlphanumeric(void *scratchBuffer, size_t offset, const char *text);
-```
-
-Add a text segment to the QR Code object, where `mode` is typically `QRCODE_MODE_INDICATOR_AUTOMATIC` to detect minimal encoding, and `charCount` is `QRCODE_TEXT_LENGTH` if null-terminated string.
-
-```c
-void QrCodeSegmentAppend(qrcode_t *qrcode, qrcode_segment_t *segment, qrcode_mode_indicator_t mode, const char *text, size_t charCount, bool mayUppercase);
-```
-
-Get the decided dimension of the code (0=error) and, if dynamic memory is used, the minimum buffer sizes for the code and scratch area (only used during generation itself). 
-If you want to use fixed-size buffers, you can pass `NULL` to ignore the parameters and the maximum buffer sizes can be known at compile time using: `QRCODE_BUFFER_SIZE()` and `QRCODE_SCRATCH_BUFFER_SIZE()`.
-
-```c
-int QrCodeSize(qrcode_t *qrcode, size_t *bufferSize, size_t *scratchBufferSize);
-```
-
-Generate the QR Code (`scratchBuffer` is only used during generation):
-
-```c
-bool QrCodeGenerate(qrcode_t *qrcode, uint8_t *buffer, uint8_t *scratchBuffer);
-```
-
-Retrieve the modules (bits/pixels) of the QR code at the given coordinate (0=light, 1=dark), you should ensure there are `QRCODE_QUIET_STANDARD` (4) units of light on all sides of the final presentation:
-
-```c
-int QrCodeModuleGet(qrcode_t* qrcode, int x, int y);
+// For each coordinate (optionally including a quiet margin), get the module at the given coordinate
+int quiet = QRTINY_QUIET_NONE;  // QRTINY_QUIET_STANDARD
+for (int y = -quiet; y < QRTINY_DIMENSION + quiet; y += 2)
+{
+    for (int x = -quiet; x < QRTINY_DIMENSION + quiet; x++)
+    {
+        int module = QrTinyModuleGet(buffer, formatInfo, x, y);
+        // module is: 0=light, 1=dark
+    }
+}
 ```
 
 
