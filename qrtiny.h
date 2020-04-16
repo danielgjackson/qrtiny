@@ -27,31 +27,43 @@ extern "C" {
 #define QRCODE_BUFFER_SIZE QRCODE_MIN_BYTES(QRCODE_DIMENSION * QRCODE_DIMENSION)
 #define QRCODE_SCRATCH_BUFFER_SIZE QRCODE_MIN_BYTES(QRCODE_TOTAL_CAPACITY)
 
-// Error correction level
-#define QRCODE_SIZE_ECL 2   // 2-bit error correction
-typedef enum
-{
-    QRCODE_ECL_M = 0x00, // 0b00 Medium (~15%)
-    QRCODE_ECL_L = 0x01, // 0b01 Low (~7%)
-    QRCODE_ECL_H = 0x02, // 0b10 High (~30%)
-    QRCODE_ECL_Q = 0x03, // 0b11 Quartile (~25%)
-} qrcode_error_correction_level_t;
 
-// Mask pattern reference (i=row, j=column; where true: invert)
-#define QRCODE_SIZE_MASK 3  // 3-bit mask size
-typedef enum
-{
-    QRCODE_MASK_000 = 0x00, // 0b000 (i + j) mod 2 = 0
-    QRCODE_MASK_001 = 0x01, // 0b001 i mod 2 = 0
-    QRCODE_MASK_010 = 0x02, // 0b010 j mod 3 = 0
-    QRCODE_MASK_011 = 0x03, // 0b011 (i + j) mod 3 = 0
-    QRCODE_MASK_100 = 0x04, // 0b100 ((i div 2) + (j div 3)) mod 2 = 0
-    QRCODE_MASK_101 = 0x05, // 0b101 (i j) mod 2 + (i j) mod 3 = 0
-    QRCODE_MASK_110 = 0x06, // 0b110 ((i j) mod 2 + (i j) mod 3) mod 2 = 0
-    QRCODE_MASK_111 = 0x07, // 0b111 ((i j) mod 3 + (i + j) mod 2) mod 2 = 0
-} qrcode_mask_pattern_t;
-
-
+// 0b00 Error-Correction Medium   (~15%, 10 codewords), V1 fits: 14 full characters / 20 alphanumeric / 34 numeric
+#define QRCODE_FORMATINFO_MASK_000_ECC_MEDIUM   0x5412
+#define QRCODE_FORMATINFO_MASK_001_ECC_MEDIUM   0x5125
+#define QRCODE_FORMATINFO_MASK_010_ECC_MEDIUM   0x5e7c
+#define QRCODE_FORMATINFO_MASK_011_ECC_MEDIUM   0x5b4b
+#define QRCODE_FORMATINFO_MASK_100_ECC_MEDIUM   0x45f9
+#define QRCODE_FORMATINFO_MASK_101_ECC_MEDIUM   0x40ce
+#define QRCODE_FORMATINFO_MASK_110_ECC_MEDIUM   0x4f97
+#define QRCODE_FORMATINFO_MASK_111_ECC_MEDIUM   0x4aa0
+// 0b01 Error-Correction Low      (~ 7%,  7 codewords), V1 fits: 17 full characters / 26 alphanumeric / 41 numeric
+#define QRCODE_FORMATINFO_MASK_000_ECC_LOW      0x77c4
+#define QRCODE_FORMATINFO_MASK_001_ECC_LOW      0x72f3
+#define QRCODE_FORMATINFO_MASK_010_ECC_LOW      0x7daa
+#define QRCODE_FORMATINFO_MASK_011_ECC_LOW      0x789d
+#define QRCODE_FORMATINFO_MASK_100_ECC_LOW      0x662f
+#define QRCODE_FORMATINFO_MASK_101_ECC_LOW      0x6318
+#define QRCODE_FORMATINFO_MASK_110_ECC_LOW      0x6c41
+#define QRCODE_FORMATINFO_MASK_111_ECC_LOW      0x6976
+// 0b10 Error-Correction High     (~30%, 17 codewords), V1 fits:  7 full characters / 10 alphanumeric / 17 numeric
+#define QRCODE_FORMATINFO_MASK_000_ECC_HIGH     0x1689
+#define QRCODE_FORMATINFO_MASK_001_ECC_HIGH     0x13be
+#define QRCODE_FORMATINFO_MASK_010_ECC_HIGH     0x1ce7
+#define QRCODE_FORMATINFO_MASK_011_ECC_HIGH     0x19d0
+#define QRCODE_FORMATINFO_MASK_100_ECC_HIGH     0x0762
+#define QRCODE_FORMATINFO_MASK_101_ECC_HIGH     0x0255
+#define QRCODE_FORMATINFO_MASK_110_ECC_HIGH     0x0d0c
+#define QRCODE_FORMATINFO_MASK_111_ECC_HIGH     0x083b
+// 0b11 Error-Correction Quartile (~25%, 13 codewords), V1 fits: 11 full characters / 16 alphanumeric / 27 numeric
+#define QRCODE_FORMATINFO_MASK_000_ECC_QUARTILE 0x355f
+#define QRCODE_FORMATINFO_MASK_001_ECC_QUARTILE 0x3068
+#define QRCODE_FORMATINFO_MASK_010_ECC_QUARTILE 0x3f31
+#define QRCODE_FORMATINFO_MASK_011_ECC_QUARTILE 0x3a06
+#define QRCODE_FORMATINFO_MASK_100_ECC_QUARTILE 0x24b4
+#define QRCODE_FORMATINFO_MASK_101_ECC_QUARTILE 0x2183
+#define QRCODE_FORMATINFO_MASK_110_ECC_QUARTILE 0x2eda
+#define QRCODE_FORMATINFO_MASK_111_ECC_QUARTILE 0x2bed
 
 // Write text to the scratchBuffer, returning the payloadLength
 size_t QrTinyWriteNumeric(void *scratchBuffer, size_t offset, const char *text);
@@ -59,7 +71,7 @@ size_t QrTinyWriteAlphanumeric(void *scratchBuffer, size_t offset, const char *t
 size_t QrTinyWrite8Bit(void *scratchBuffer, size_t offset, const char *text);
 
 // Generate the code for the given encoded text
-bool QrTinyGenerate(uint8_t *buffer, uint8_t *scratchBuffer, size_t payloadLength, qrcode_error_correction_level_t errorCorrectionLevel, qrcode_mask_pattern_t maskPattern);
+bool QrTinyGenerate(uint8_t *buffer, uint8_t *scratchBuffer, size_t payloadLength, int formatInfo);
 
 // Get the module at the given coordinate (0=light, 1=dark)
 int QrTinyModuleGet(uint8_t *buffer, int x, int y);

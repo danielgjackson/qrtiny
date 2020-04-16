@@ -41,6 +41,7 @@ void OutputQrCodeTextMedium(uint8_t *buffer, FILE* fp, int quiet, bool invert)
     }
 }
 
+
 int main(int argc, char *argv[])
 {
     FILE *ofp = stdout;
@@ -49,17 +50,15 @@ int main(int argc, char *argv[])
     bool invert = false;
     int quiet = QRCODE_QUIET_STANDARD;
     output_mode_t outputMode = OUTPUT_TEXT_MEDIUM;
-    qrcode_error_correction_level_t errorCorrectionLevel = QRCODE_ECL_M;
-    qrcode_mask_pattern_t maskPattern = QRCODE_MASK_000;
+    int formatInfo = QRCODE_FORMATINFO_MASK_000_ECC_MEDIUM;
     
     for (int i = 1; i < argc; i++)
     {
         if (!strcmp(argv[i], "--help")) { help = true; }
-        else if (!strcmp(argv[i], "--ecl:l")) { errorCorrectionLevel = QRCODE_ECL_L; }
-        else if (!strcmp(argv[i], "--ecl:m")) { errorCorrectionLevel = QRCODE_ECL_M; }
-        else if (!strcmp(argv[i], "--ecl:q")) { errorCorrectionLevel = QRCODE_ECL_Q; }
-        else if (!strcmp(argv[i], "--ecl:h")) { errorCorrectionLevel = QRCODE_ECL_H; }
-        else if (!strcmp(argv[i], "--mask")) { maskPattern = atoi(argv[++i]); }
+        else if (!strcmp(argv[i], "--ecl:m")) { formatInfo = QRCODE_FORMATINFO_MASK_000_ECC_MEDIUM; }
+        else if (!strcmp(argv[i], "--ecl:l")) { formatInfo = QRCODE_FORMATINFO_MASK_000_ECC_LOW; }
+        else if (!strcmp(argv[i], "--ecl:h")) { formatInfo = QRCODE_FORMATINFO_MASK_000_ECC_HIGH; }
+        else if (!strcmp(argv[i], "--ecl:q")) { formatInfo = QRCODE_FORMATINFO_MASK_000_ECC_QUARTILE; }
         else if (!strcmp(argv[i], "--quiet")) { quiet = atoi(argv[++i]); }
         else if (!strcmp(argv[i], "--invert")) { invert = !invert; }
         else if (!strcmp(argv[i], "--file"))
@@ -109,7 +108,7 @@ int main(int argc, char *argv[])
     uint8_t *buffer = malloc(QRCODE_BUFFER_SIZE);
 
     // Generate the QR Code bitmap
-    bool result = QrTinyGenerate(buffer, scratchBuffer, payloadLength, errorCorrectionLevel, maskPattern);
+    bool result = QrTinyGenerate(buffer, scratchBuffer, payloadLength, formatInfo);
 
     if (result)
     {
