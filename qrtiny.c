@@ -5,10 +5,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <string.h>
-#include <ctype.h>
-
-// For output functions (TODO: Move these out?)
-#include <stdio.h>
 
 #include "qrtiny.h"
 

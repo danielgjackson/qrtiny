@@ -1,8 +1,8 @@
-# make USER_DEFINES="-DNO_MMAP=1"
+#  -fstack-usage -fdump-tree-optimized
 
 BIN_NAME = qrtiny
 CC = gcc
-CFLAGS = -O1 -Wall -Wstrict-overflow=0  -fstack-usage -fdump-tree-optimized
+CFLAGS = -O1 -Wall -Wstrict-overflow=0
 LIBS = 
 
 SRC = $(wildcard *.c)
