@@ -27,14 +27,14 @@ void OutputQrTinyTextMedium(uint8_t *buffer, uint16_t formatInfo, FILE* fp, int 
         for (int x = -quiet; x < QRTINY_DIMENSION + quiet; x++)
         {
             int bitU = QrTinyModuleGet(buffer, formatInfo, x, y) & 1;
-            int bitL = (y + 1 < QRTINY_DIMENSION + quiet) ? (QrTinyModuleGet(buffer, formatInfo, x, y + 1) & 1) : (invert ? 0 : 1);
+            int bitL = (y + 1 < QRTINY_DIMENSION + quiet) ? (QrTinyModuleGet(buffer, formatInfo, x, y + 1) & 1) : (invert ? 1 : 0);
             int value = ((bitL ? 2 : 0) + (bitU ? 1 : 0)) ^ (invert ? 0x3 : 0x0);
             switch (value)
             {
-            case 0: fprintf(fp, " "); break; // '\u{0020}' space
-            case 1: fprintf(fp, "▀"); break; // '\u{2580}' upper half block
-            case 2: fprintf(fp, "▄"); break; // '\u{2584}' lower half block
-            case 3: fprintf(fp, "█"); break; // '\u{2588}' block
+                case 0: fprintf(fp, " "); break; // '\u{0020}' space
+                case 1: fprintf(fp, "▀"); break; // '\u{2580}' upper half block
+                case 2: fprintf(fp, "▄"); break; // '\u{2584}' lower half block
+                case 3: fprintf(fp, "█"); break; // '\u{2588}' block
             }
         }
         fprintf(fp, "\n");
@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
     }
     else
     {
-        fprintf(stderr, "ERROR: Could not generate QR Code (too much data).\n");
+        fprintf(stderr, "ERROR: Could not generate QR Code (data too long).\n");
     }
 
     if (ofp != stdout) fclose(ofp);

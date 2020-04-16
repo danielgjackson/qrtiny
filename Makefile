@@ -2,7 +2,7 @@
 
 BIN_NAME = qrtiny
 CC = gcc
-CFLAGS = -O3 -Wall -Wstrict-overflow=0
+CFLAGS = -O1 -Wall -Wstrict-overflow=0  -fstack-usage -fdump-tree-optimized
 LIBS = 
 
 SRC = $(wildcard *.c)

@@ -67,7 +67,7 @@ size_t QrTinyWriteNumeric(void *buffer, size_t offset, const char *text);
 size_t QrTinyWriteAlphanumeric(void *buffer, size_t offset, const char *text);
 size_t QrTinyWrite8Bit(void *buffer, size_t offset, const char *text);
 
-// Compute the remaining buffer space: any required padding and the calculated error-correction information
+// Compute the remaining buffer contents: any required padding and the calculated error-correction information
 bool QrTinyGenerate(uint8_t *buffer, size_t payloadLength, uint16_t formatInfo);
 
 // Get the module at the given coordinate (0=light, 1=dark)
