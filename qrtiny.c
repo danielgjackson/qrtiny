@@ -52,6 +52,7 @@ size_t QrTinyWriteNumeric(void *buffer, size_t bitPosition, const char *text)
 {
     size_t charCount = strlen(text);
     size_t bitsWritten = 0;
+    bitsWritten += QrTinyBufferAppend(buffer, bitPosition + bitsWritten, QRTINY_MODE_INDICATOR_NUMERIC, QRTINY_SIZE_MODE_INDICATOR);
     bitsWritten += QrTinyBufferAppend(buffer, bitPosition + bitsWritten, (uint32_t)charCount, QRTINY_MODE_NUMERIC_COUNT_BITS);
     for (size_t i = 0; i < charCount; )
     {
@@ -61,7 +62,7 @@ size_t QrTinyWriteNumeric(void *buffer, size_t bitPosition, const char *text)
         // Maximal groups of 3/2/1 digits encoded to 10/7/4-bit binary
         if (remain > 1) { value = value * 10 + text[i + 1] - '0'; bits += 3; }
         if (remain > 2) { value = value * 10 + text[i + 2] - '0'; bits += 3; }
-        bitsWritten += QrTinyBufferAppend(buffer, bitPosition + bitsWritten, QRTINY_MODE_INDICATOR_8_BIT, QRTINY_SIZE_MODE_INDICATOR);
+        bitsWritten += QrTinyBufferAppend(buffer, bitPosition + bitsWritten, value, bits);
         i += remain;
     }
     return bitsWritten;

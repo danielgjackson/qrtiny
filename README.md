@@ -12,13 +12,15 @@ Required files: [`qrtiny.h`](qrtiny.h) [`qrtiny.c`](qrtiny.c)
 
 ```c
 // Use a (26 byte) buffer for holding the encoded payload and ECC calculations
-uint8_t *buffer[QRCODE_SCRATCH_BUFFER_SIZE];
+uint8_t buffer[QRTINY_BUFFER_SIZE];
 ```
 
 ```c
-// Encode one or more segments of text to the buffer (can also use `QrTinyWriteNumeric()` or `QrTinyWrite8Bit()`).
+// Encode one or more segments text to the buffer
 size_t payloadLength = 0;
-payloadLength += QrTinyWriteAlphanumeric(buffer, payloadLength, text);
+payloadLength += QrTinyWriteAlphanumeric(buffer, payloadLength, "TESTING-");
+payloadLength += QrTinyWriteNumeric(buffer, payloadLength, "1234567890");
+payloadLength += QrTinyWrite8Bit(buffer, payloadLength, "!");
 ```
 
 ```c
@@ -69,7 +71,7 @@ By error-correction level and content type, the maximum character counts are:
 | Quartile (13)  |       11 |       16 |       27 |
 | High (17)      |        7 |       10 |       17 |
 
-Alphanumeric is upper-case A-Z, numeric 0-9, or one of the allowed symbols " $%*+-./:".
+Alphanumeric is upper-case A-Z, numeric 0-9, or one of the allowed symbols: *space* `$` `%` `*` `+` `-` `.` `/` `:`
 
 Example uses:
 

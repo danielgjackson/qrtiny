@@ -62,10 +62,10 @@ extern "C" {
 #define QRTINY_FORMATINFO_MASK_110_ECC_QUARTILE 0x2eda
 #define QRTINY_FORMATINFO_MASK_111_ECC_QUARTILE 0x2bed
 
-// Write text to the buffer, returning the number of bits written
-size_t QrTinyWriteNumeric(void *buffer, size_t offset, const char *text);
-size_t QrTinyWriteAlphanumeric(void *buffer, size_t offset, const char *text);
-size_t QrTinyWrite8Bit(void *buffer, size_t offset, const char *text);
+// Encode one or more segments of text to the buffer (at bit offset specified), returning the number of bits written. Caller must ensure buffer has capacity.
+size_t QrTinyWriteNumeric(void *buffer, size_t offset, const char *text);       // 17-41 digits, depending on ECC.
+size_t QrTinyWriteAlphanumeric(void *buffer, size_t offset, const char *text);  // 10-26 characters (upper-case/digits/symbols), depending on ECC.
+size_t QrTinyWrite8Bit(void *buffer, size_t offset, const char *text);          //  7-17 8-bit characters, depending on ECC.
 
 // Compute the remaining buffer contents: any required padding and the calculated error-correction information
 bool QrTinyGenerate(uint8_t *buffer, size_t payloadLength, uint16_t formatInfo);

@@ -99,10 +99,11 @@ int main(int argc, char *argv[])
     }
 
     // Create a buffer for holding the encoded payload and ECC calculations
-    uint8_t *buffer = malloc(QRTINY_BUFFER_SIZE);
+    uint8_t buffer[QRTINY_BUFFER_SIZE];
 
     // Encode the text into the buffer
-    size_t payloadLength = QrTinyWriteAlphanumeric(buffer, 0, value);
+    size_t payloadLength = 0;
+    payloadLength += QrTinyWriteAlphanumeric(buffer, payloadLength, value); // QrTinyWriteNumeric(); QrTinyWrite8Bit();
 
     // Generate the QR Code bitmap
     bool result = QrTinyGenerate(buffer, payloadLength, formatInfo);
