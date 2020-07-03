@@ -4,7 +4,7 @@ Generates a "V1" QR Code.
 
 This generates the smallest standard QR Code, "V1", at 21x21 modules.  The software is optimized for very low RAM use, suitable for embedded environments.  In particular, the output modules are computed on demand rather than stored to a buffer in one go.  This method sacrifices run-time performance for a minimal non-stack RAM state of as little as 26 bytes.
 
-For a full QR Code generator, see: [qrcode](https://github.com/danielgjackson/qrcode).
+For a full QR Code generator, see: [qrcode](https://github.com/danielgjackson/qrcode).  For a JavaScript version, see: [qrcodejs](https://github.com/danielgjackson/qrcodejs).
 
 ## Use
 
